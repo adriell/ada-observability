@@ -1,19 +1,24 @@
-from flask import Flask, render_template
-from prometheus_flask_exporter import PrometheusMetrics
+from flask import Flask, jsonify, request, render_template, abort
 import logging
 
 app = Flask(__name__)
-metrics = PrometheusMetrics(app)
+app.logger.setLevel(logging.ERROR)
 
-@app.route('/renda-fixa')
-@metrics.counter('vendas_renda_fixa', 'Numero de acoes de renda fixas efetivados', labels={'tipo':'ACOES'})
-def renda_fixa():
-    return render_template("lista.html", titulo="Renda Fixa")
-@app.route('/renda-variavel')
-@metrics.counter('vendas_renda_variavel', 'Numero de acoes de renda variável efetivados', labels={'tipo':'VARIAVEL'})
-def renda_variavel():
-    return render_template("lista.html", titulo="Renda Fixa")
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    #name = request.form.get('name')
+    try:
+        # Simulando um erro no código
+        return render_template('result.html', name=name)
+    except Exception as e:
+        # Abortar com erro 500i
+        app.logger.exception('Ocorreu um erro interno')
+
+        abort(500)
+
 if __name__ == "__main__":
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    app.run(host="0.0.0.0", port=5001)
+    app.run(host="0.0.0.0", port=5001, debug=True)
