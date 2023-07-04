@@ -1,0 +1,44 @@
+version: '3'
+services:
+  app:
+    image: ada
+    container_name: app
+    ports:
+      - 5001:5001
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "tcp://192.168.15.2:12201"
+        tag: site
+  
+  client_http:
+    image: client_http:1
+    container_name: client_http
+    ports:
+      - 6001:6001
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    container_name: grafana
